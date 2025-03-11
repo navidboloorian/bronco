@@ -7,6 +7,8 @@
 #include <arpa/inet.h>
 #include <signal.h>
 #include <unistd.h>
+#include <errno.h>
+#include "http.h"
 
 #define PORT "2316"
 
@@ -48,31 +50,44 @@ int find_valid_socket(struct addrinfo *sockets, struct addrinfo *selected_socket
   return sockfd;
 }
 
-void parse_incoming_requests(int sockfd, struct addrinfo *selected_socket) {
+void handle_connections(int sockfd, struct addrinfo *selected_socket) {
   struct sockaddr_storage incoming_addr;
   socklen_t incoming_addr_size;
+  char buf[100];
+
+  // working directory for file retrieval
+  chdir("../www");
 
   printf("server waiting for connections on port %s...\n", PORT);
 
   while(1) {
     incoming_addr_size = sizeof incoming_addr;
 
-    int incoming_sockfd = accept(sockfd, (struct sockaddr *)&incoming_addr, &incoming_addr_size);
+    int new_sockfd = accept(sockfd, (struct sockaddr *)&incoming_addr, &incoming_addr_size);
 
-    if (incoming_sockfd == -1) {
+    if (new_sockfd == -1) {
       perror("accept");
       continue;
     }
 
-    if (!fork()) {
-      close(sockfd);
-      if (send(incoming_sockfd, "Hello, world!", 13, 0) == -1)
-				perror("send");
-			close(incoming_sockfd);
-			exit(0);
+    if ((recv(new_sockfd, buf, 99, 0)) == -1) {
+      perror("recv");
+      continue;
     }
 
-    close(incoming_sockfd);
+    char *type = strtok(buf, " ");
+    char *path = strtok(NULL, " ");
+    char *protocol = strtok(NULL, " ");
+
+    char *response;
+    
+    int status = parse_request(type, path, protocol, &response);
+
+    printf("%s %s: %d\n", type, path, status);
+
+    send(new_sockfd, response, strlen(response), 0);
+    free(response);
+    close(new_sockfd);
   }
 }
 
@@ -102,7 +117,7 @@ int main(void) {
     exit(1);
   }
 
-  parse_incoming_requests(sockfd, selected_socket);
+  handle_connections(sockfd, selected_socket);
 
   return 0;
 }
