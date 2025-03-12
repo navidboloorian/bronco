@@ -4,6 +4,6 @@
 /**
  * Returns status code of request. Response message will be stored in response.
  */
-int parse_request(char *type, char *path, char *protocol, char **response);
+void parse_request(char *type, char *path, char *protocol, char **response, int);
 
 #endif

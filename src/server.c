@@ -10,9 +10,8 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include "threading.h"
 #include "http.h"
-
-#define PORT "2306"
 
 /**
  * Returns the socket file descriptor the server is bound to if successful and -1 if not.
@@ -62,7 +61,7 @@ void handle_connections(int sockfd, struct addrinfo *selected_socket, char port[
 
   printf("server waiting for connections on port %s...\n", port);
 
-  while(true) {
+  while(1) {
     incoming_addr_size = sizeof incoming_addr;
 
     int new_sockfd = accept(sockfd, (struct sockaddr *)&incoming_addr, &incoming_addr_size);
@@ -82,14 +81,17 @@ void handle_connections(int sockfd, struct addrinfo *selected_socket, char port[
     char *protocol = strtok(NULL, " ");
 
     char *response;
-    
-    int status = parse_request(type, path, protocol, &response);
 
-    printf("%s %s: %d\n", type, path, status);
+    Request req = {
+      .request_function = &parse_request,
+      .path = path,
+      .type = type,
+      .protocol = protocol,
+      .response = &response,
+      .sockfd = new_sockfd
+    };
 
-    send(new_sockfd, response, strlen(response), 0);
-    free(response);
-    close(new_sockfd);
+    add_request(req);
   }
 }
 
@@ -157,7 +159,9 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
+  create_thread_pool();
   handle_connections(sockfd, selected_socket, port);
+  destroy_thread_pool();
 
   return 0;
 }

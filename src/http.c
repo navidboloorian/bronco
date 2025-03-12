@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 #include "http.h"
 
 int get(char *path, char **response) {
@@ -20,8 +23,7 @@ int get(char *path, char **response) {
       strcpy(header, "HTTP/1.1 404 Not Found\n\n\0");
       file = fopen("404.html", "r");
       status_code = 404;
-    }
-    else {
+    } else {
       strcpy(header, "HTTP/1.1 200 OK\n\n\0");
       status_code = 200;
     }
@@ -43,10 +45,15 @@ int get(char *path, char **response) {
     return status_code;
 }
 
-int parse_request(char *type, char *path, char *protocol, char **response) {
+void parse_request(char *type, char *path, char *protocol, char **response, int sockfd) {
   if (strcmp(type, "GET") == 0) {
-    return get(path, response);
-  }
+    int status_code = get(path, response);
 
-  return 0;
+
+    send(sockfd, *response, strlen(*response), 0);
+
+    printf("%s %s: %d\n", type, path, status_code);
+    free(*response);
+    close(sockfd);
+  }
 }
