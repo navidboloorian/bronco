@@ -24,3 +24,7 @@ Bronco serves files stored in the `www` directory. Any file added there will be 
 1. Navigate to the `src` directory
 2. Run `make` 
 3. Run `./bronco [port number]`
+
+## Resources used
+- [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/)
+- [HTTP/1.1 RFC](https://datatracker.ietf.org/doc/html/rfc2616)
