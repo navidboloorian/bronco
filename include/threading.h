@@ -1,6 +1,5 @@
 #ifndef THREADING_H_
 #define THREADING_H_
-#define THREAD_COUNT 8
 
 typedef struct Request {
   void (*request_function)(char*, char*, char*, char**, int);

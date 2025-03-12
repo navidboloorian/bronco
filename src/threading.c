@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include "threading.h"
 
+#define THREAD_COUNT 8
+
 pthread_mutex_t queue_mutex;
 pthread_cond_t queue_cond;
 pthread_t threads[THREAD_COUNT];

@@ -3,7 +3,7 @@
 Bronco is a lightweight web server written in C.
 
 ## Demo
-
+![Bronco Demo](bronco_demo.gif)
 ## How it works
 
 Bronco uses sockets to create a TCP server and implements a subset of HTTP/1.1.
