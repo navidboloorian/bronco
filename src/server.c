@@ -76,6 +76,10 @@ void handle_connections(int sockfd, struct addrinfo *selected_socket, char port[
       continue;
     }
 
+    if ((recv(new_sockfd, buf, 99, 0)) == 0) {
+      continue;
+    }
+
     char *type = strtok(buf, " ");
     char *path = strtok(NULL, " ");
     char *protocol = strtok(NULL, " ");

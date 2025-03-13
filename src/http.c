@@ -49,7 +49,6 @@ void parse_request(char *type, char *path, char *protocol, char **response, int 
   if (strcmp(type, "GET") == 0) {
     int status_code = get(path, response);
 
-
     send(sockfd, *response, strlen(*response), 0);
 
     printf("%s %s: %d\n", type, path, status_code);
