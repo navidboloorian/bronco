@@ -53,6 +53,5 @@ void parse_request(char *type, char *path, char *protocol, char **response, int 
 
     printf("%s %s: %d\n", type, path, status_code);
     free(*response);
-    close(sockfd);
   }
 }

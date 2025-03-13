@@ -13,6 +13,8 @@
 #include "threading.h"
 #include "http.h"
 
+#define BUFFER_SIZE 1024
+
 /**
  * Returns the socket file descriptor the server is bound to if successful and -1 if not.
  */
@@ -54,7 +56,7 @@ int find_valid_socket(struct addrinfo *sockets, struct addrinfo *selected_socket
 void handle_connections(int sockfd, struct addrinfo *selected_socket, char port[]) {
   struct sockaddr_storage incoming_addr;
   socklen_t incoming_addr_size;
-  char buf[100];
+  char buf[BUFFER_SIZE];
 
   // working directory for file retrieval
   chdir("../www");
@@ -71,12 +73,14 @@ void handle_connections(int sockfd, struct addrinfo *selected_socket, char port[
       continue;
     }
 
-    if ((recv(new_sockfd, buf, 99, 0)) == -1) {
+    int bytes_received = recv(new_sockfd, buf, BUFFER_SIZE - 1, 0);
+
+    if (bytes_received == -1) {
       perror("recv");
       continue;
     }
 
-    if ((recv(new_sockfd, buf, 99, 0)) == 0) {
+    if (bytes_received == 0) {
       continue;
     }
 
