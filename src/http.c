@@ -20,11 +20,11 @@ int get(char *path, char **response) {
     char *file_contents;
 
     if (file == NULL) {
-      strcpy(header, "HTTP/1.1 404 Not Found\n\n\0");
+      strcpy(header, "HTTP/1.1 404 Not Found\n");
       file = fopen("404.html", "r");
       status_code = 404;
     } else {
-      strcpy(header, "HTTP/1.1 200 OK\n\n\0");
+      strcpy(header, "HTTP/1.1 200 OK\n");
       status_code = 200;
     }
 
@@ -33,12 +33,17 @@ int get(char *path, char **response) {
     rewind(file);
 
     file_contents = (char *)malloc(size);
-
+    
     fread(file_contents, 1, size, file);
     fclose(file);
 
-    *response = (char *)malloc(strlen(header) + strlen(file_contents));
-    sprintf(*response, "%s%s", header, file_contents);
+    int content_length = strlen(file_contents);
+    char content_length_header[100];
+
+    sprintf(content_length_header, "Content-Length: %d\nConnection: close\n\n", content_length);
+
+    *response = (char *)malloc(strlen(header) + strlen(file_contents) + strlen(content_length_header));
+    sprintf(*response, "%s%s%s", header, content_length_header, file_contents);
 
     free(file_contents);
 
